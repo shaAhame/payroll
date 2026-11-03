@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* Light, restrained palette for an HR/finance tool. Navy sidebar, one blue accent. */
+:root {
+  --background: #f5f6f8;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #f1f3f6;
+  --muted-foreground: #5b6474;
+  --border: #e3e6eb;
+  --input: #d7dbe2;
+  --ring: #2f5bd3;
+  --primary: #2449b8;
+  --primary-foreground: #ffffff;
+  --destructive: #c2362b;
+  --destructive-soft: #fdecea;
+  --success: #17804a;
+  --success-soft: #e8f6ee;
+  --warning: #a35c00;
+  --warning-soft: #fff4e0;
+  --info: #1d63b8;
+  --info-soft: #e8f1fc;
+  --sidebar: #0f1b2d;
+  --sidebar-foreground: #c9d2e0;
+  --sidebar-active: #1c2c45;
+  --sidebar-muted: #7f8ca3;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.04);
+  --shadow-xs: 0 1px 1px rgb(15 23 42 / 0.03);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}
