@@ -19,8 +19,8 @@ begin
     'payroll_deductions','payslips','email_notifications','email_delivery_attempts','email_queue',
     'email_webhook_events','audit_logs','app_notifications']
   loop
+    -- (not FORCE: the table owner runs the SECURITY DEFINER workflow functions and must bypass RLS)
     execute format('alter table public.%I enable row level security', t);
-    execute format('alter table public.%I force row level security', t);
   end loop;
 end $$;
 

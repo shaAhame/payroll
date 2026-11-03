@@ -124,7 +124,8 @@ npx supabase login
 npx supabase link --project-ref <your-project-ref>
 npx supabase db push
 ```
-or paste each file from `supabase/migrations/` into the SQL editor **in filename order**:
+or — simplest — open `supabase/setup.sql`, paste the whole file into *SQL Editor → New query* and click **Run** once
+(it contains all migrations in order). Alternatively paste each file from `supabase/migrations/` **in filename order**:
 `…01_schema.sql`, `…02_functions.sql`, `…03_rls.sql`, `…04_storage_and_defaults.sql`, `…05_reporting_views.sql`.
 
 ### 4.3 Configure Supabase Authentication
