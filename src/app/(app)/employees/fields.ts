@@ -30,7 +30,7 @@ export const salaryFields: FieldDef[] = [
   { name: "basic_salary", label: "Basic Salary (LKR)", type: "money", required: true },
   { name: "bra2", label: "BRA 2 (LKR)", type: "money", required: true },
   { name: "bra1", label: "BRA 1 (LKR)", type: "money", required: true },
-  { name: "performance_incentive", label: "Performance Incentive (LKR)", type: "money", required: true, hint: "Included in the daily salary basis, not in EPF" },
+  { name: "performance_incentive", label: "Performance Incentive (LKR)", type: "money", required: true, hint: "Paid as an earning; not part of the EPF or daily salary basis" },
   { name: "effective_from", label: "Effective from", type: "date", required: true },
   { name: "notes", label: "Notes", type: "textarea" },
 ];

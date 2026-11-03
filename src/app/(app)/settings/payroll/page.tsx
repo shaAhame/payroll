@@ -20,7 +20,7 @@ export default async function PayrollSettingsPage() {
         <div className="font-semibold">Fixed company formulas (not configurable)</div>
         <ul className="mt-1 list-disc space-y-0.5 pl-5 text-muted-foreground">
           <li>EPF Salary Basis = Basic Salary + BRA 2 + BRA 1 (Performance Incentive is never included)</li>
-          <li>Daily Salary Basis = Basic Salary + BRA 2 + BRA 1 + Performance Incentive</li>
+          <li>Daily Salary Basis = Basic Salary + BRA 2 + BRA 1 (Performance Incentive is never included)</li>
           <li>Performance Incentive is counted once in Total Earnings · Net Salary = Total Earnings − Total Deductions</li>
           <li>Additional working pay and no-pay leave are one monthly adjustment from (actual − allocated) days, never both</li>
         </ul>

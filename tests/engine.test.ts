@@ -32,24 +32,24 @@ describe("specification sample employee", () => {
     expect(calculateEmployeeEPF(epf).toFixed(2)).toBe("3840.00");
   });
 
-  it("Daily Salary Basis = 50,000 and Daily Rate = 2,000 over 25 days", () => {
+  it("Daily Salary Basis = 48,000 (Performance Incentive excluded) and Daily Rate = 1,920 over 25 days", () => {
     const basis = calculateDailySalaryBasis(salary);
-    expect(basis.toFixed(2)).toBe("50000.00");
-    expect(calculateDailySalaryRate(basis, 25).toFixed(2)).toBe("2000.00");
+    expect(basis.toFixed(2)).toBe("48000.00");
+    expect(calculateDailySalaryRate(basis, 25).toFixed(2)).toBe("1920.00");
   });
 
-  it("27 actual days → LKR 4,000 additional working pay, no no-pay", () => {
+  it("27 actual days → LKR 3,840 additional working pay, no no-pay", () => {
     const r = calculatePayroll(input({ attendance: attendance(27) }));
     expect(r.additionalWorkingDays.toString()).toBe("2");
     expect(r.additionalOffDays.toString()).toBe("0");
-    expect(r.additionalWorkingPay.toFixed(2)).toBe("4000.00");
+    expect(r.additionalWorkingPay.toFixed(2)).toBe("3840.00");
     expect(r.noPayLeave.toFixed(2)).toBe("0.00");
   });
 
-  it("23 actual days → LKR 4,000 no-pay leave, no additional pay", () => {
+  it("23 actual days → LKR 3,840 no-pay leave, no additional pay", () => {
     const r = calculatePayroll(input({ attendance: attendance(23, { absent: 2 }) }));
     expect(r.additionalOffDays.toString()).toBe("2");
-    expect(r.noPayLeave.toFixed(2)).toBe("4000.00");
+    expect(r.noPayLeave.toFixed(2)).toBe("3840.00");
     expect(r.additionalWorkingPay.toFixed(2)).toBe("0.00");
   });
 
@@ -66,7 +66,15 @@ describe("specification sample employee", () => {
     expect(r.totalDeductions.toFixed(2)).toBe("3840.00");
     expect(r.netSalary.toFixed(2)).toBe("46160.00");
     expect(r.epfSalaryBasis.toFixed(2)).toBe("48000.00");
-    expect(r.dailySalaryBasis.toFixed(2)).toBe("50000.00");
+    expect(r.dailySalaryBasis.toFixed(2)).toBe("48000.00");
+    expect(r.dailySalaryRate.toFixed(2)).toBe("1920.00");
+  });
+
+  it("changing the Performance Incentive never changes the daily rate", () => {
+    const a = calculatePayroll(input());
+    const b = calculatePayroll(input({ salary: { ...salary, performanceIncentive: "9000" } }));
+    expect(b.dailySalaryRate.toFixed(4)).toBe(a.dailySalaryRate.toFixed(4));
+    expect(b.totalEarnings.minus(a.totalEarnings).toFixed(2)).toBe("7000.00");
   });
 
   it("EPF never uses the daily basis, even when additional pay or no-pay apply", () => {
@@ -87,12 +95,12 @@ describe("working-day rules", () => {
   it("no-pay leave status and the monthly shortfall are one adjustment, not two", () => {
     const r = calculatePayroll(input({ attendance: attendance(24, { no_pay_leave: 1 }) }));
     expect(r.deductions.filter((d) => d.category === "no_pay_leave")).toHaveLength(1);
-    expect(r.noPayLeave.toFixed(2)).toBe("2000.00");
+    expect(r.noPayLeave.toFixed(2)).toBe("1920.00");
   });
 
   it("supports unpaid approved leave when configured", () => {
     const r = calculatePayroll(input({ attendance: attendance(24, { approved_leave: 1 }), settings: { ...DEFAULT_SETTINGS, approvedLeaveTreatment: "unpaid" } }));
-    expect(r.noPayLeave.toFixed(2)).toBe("2000.00");
+    expect(r.noPayLeave.toFixed(2)).toBe("1920.00");
   });
 
   it("rounds only the final amount (non-integer daily rate)", () => {
@@ -156,13 +164,13 @@ describe("commissions, other earnings, advances and loans", () => {
     expect(r.netSalary.toFixed(2)).toBe("43660.00");
   });
 
-  it("monthly incentive records raise the daily basis but never the EPF basis", () => {
+  it("monthly incentive records are paid once and change neither basis", () => {
     const r = calculatePayroll(input({ performanceIncentiveRecords: [{ id: "p1", amount: "500" }], attendance: attendance(26) }));
     expect(r.performanceIncentive.toFixed(2)).toBe("2500.00");
-    expect(r.dailySalaryBasis.toFixed(2)).toBe("50500.00");
+    expect(r.dailySalaryBasis.toFixed(2)).toBe("48000.00");
     expect(r.epfSalaryBasis.toFixed(2)).toBe("48000.00");
-    expect(r.additionalWorkingPay.toFixed(2)).toBe("2020.00");
-    expect(r.totalEarnings.toFixed(2)).toBe("52520.00");
+    expect(r.additionalWorkingPay.toFixed(2)).toBe("1920.00");
+    expect(r.totalEarnings.toFixed(2)).toBe("52420.00"); // 48,000 + 2,500 + 1,920
   });
 
   it("override mode replaces the structure incentive with the monthly record", () => {

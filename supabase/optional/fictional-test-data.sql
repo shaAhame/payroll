@@ -21,6 +21,6 @@ begin
   end loop;
 end $$;
 -- Expected after processing January 2026 payroll:
---   EPF basis 48,000 · EPF 8% 3,840 · Daily basis 50,000 · Daily rate 2,000
---   Additional working pay 4,000 (27 vs 25 days) · Late 750 (250 + 500)
---   Total earnings 54,000 · Total deductions 4,590 · Net 49,410
+--   EPF basis 48,000 · EPF 8% 3,840 · Daily basis 48,000 · Daily rate 1,920
+--   Additional working pay 3,840 (27 vs 25 days) · Late 750 (250 + 500)
+--   Total earnings 53,840 · Total deductions 4,590 · Net 49,250

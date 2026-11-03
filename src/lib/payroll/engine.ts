@@ -5,10 +5,10 @@
  * every figure, line item and breakdown. It never reads or writes the database,
  * so the same code path is used for first calculation, recalculation and tests.
  *
- * Two calculation bases are kept strictly separate:
- *   EPF Salary Basis   = Basic + BRA 2 + BRA 1                       (EPF only)
- *   Daily Salary Basis = Basic + BRA 2 + BRA 1 + Performance Incentive (daily rate only)
- * Performance Incentive appears once in Total Earnings.
+ * Two calculation bases are kept as separate, independently used values:
+ *   EPF Salary Basis   = Basic + BRA 2 + BRA 1   (EPF only)
+ *   Daily Salary Basis = Basic + BRA 2 + BRA 1   (daily rate only)
+ * Performance Incentive is in neither basis; it is paid once in Total Earnings.
  */
 import Decimal from "decimal.js";
 
@@ -217,9 +217,9 @@ export function calculateEmployerContributions(epfSalaryBasis: Numeric, epfRate:
   return { employerEpf: round2(D(epfSalaryBasis).times(D(epfRate))), employerEtf: round2(D(epfSalaryBasis).times(D(etfRate))) };
 }
 
-/** Daily Salary Basis = Basic Salary + BRA 2 + BRA 1 + Performance Incentive. */
-export function calculateDailySalaryBasis(c: { basicSalary: Numeric; bra2: Numeric; bra1: Numeric; performanceIncentive: Numeric }): Decimal {
-  return round2(D(c.basicSalary).plus(D(c.bra2)).plus(D(c.bra1)).plus(D(c.performanceIncentive)));
+/** Daily Salary Basis = Basic Salary + BRA 2 + BRA 1. Performance Incentive is not included. */
+export function calculateDailySalaryBasis(c: { basicSalary: Numeric; bra2: Numeric; bra1: Numeric }): Decimal {
+  return round2(D(c.basicSalary).plus(D(c.bra2)).plus(D(c.bra1)));
 }
 
 export function daysInMonth(payrollMonth: string): number {
@@ -394,7 +394,7 @@ export function calculatePayroll(input: EngineInput): EngineResult {
 
   // Separate calculation bases
   const epfSalaryBasis = calculateEPFSalary({ basicSalary: basic, bra2, bra1 });
-  const dailySalaryBasis = calculateDailySalaryBasis({ basicSalary: basic, bra2, bra1, performanceIncentive });
+  const dailySalaryBasis = calculateDailySalaryBasis({ basicSalary: basic, bra2, bra1 });
 
   const allocated = D(input.allocatedWorkingDays);
   if (allocated.lte(0)) {

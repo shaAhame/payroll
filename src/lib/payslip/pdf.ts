@@ -133,7 +133,7 @@ export async function renderPayslipPdf(d: PayslipData): Promise<Uint8Array> {
   y -= 16;
   const basis: [string, string][] = [
     ["EPF Salary Basis (Basic + BRA 2 + BRA 1)", `LKR ${fmt(d.basis.epfSalaryBasis)}`],
-    ["Daily Salary Basis (with Perf. Incentive)", `LKR ${fmt(d.basis.dailySalaryBasis)}`],
+    ["Daily Salary Basis (Basic + BRA 2 + BRA 1)", `LKR ${fmt(d.basis.dailySalaryBasis)}`],
     ["Daily Salary Rate", `LKR ${fmt(d.basis.dailySalaryRate)}`],
     ["Allocated Working Days", d.basis.allocatedDays],
     ["Actual Working Days", d.basis.actualDays],

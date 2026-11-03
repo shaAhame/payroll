@@ -97,7 +97,7 @@ export async function sendTestEmail(to: string) {
       employee: { code: "EMP-SAMPLE", name: "Sample Employee", designation: "Sample", epfNumber: null, branch: "Sample" },
       earnings: [{ label: "Basic Salary", amount: "40000" }, { label: "BRA 2", amount: "5000" }, { label: "BRA 1", amount: "3000" }, { label: "Performance Incentive", amount: "2000" }],
       deductions: [{ label: "EPF 8%", amount: "3840" }], totalEarnings: "50000", totalDeductions: "3840", netSalary: "46160",
-      basis: { epfSalaryBasis: "48000", dailySalaryBasis: "50000", dailySalaryRate: "2000", allocatedDays: "25", actualDays: "25", additionalDays: "0", offDays: "0" },
+      basis: { epfSalaryBasis: "48000", dailySalaryBasis: "48000", dailySalaryRate: "1920", allocatedDays: "25", actualDays: "25", additionalDays: "0", offDays: "0" },
       employer: { epf: "5760", etf: "1440" }, generatedAt: new Date().toLocaleString("en-GB"),
     });
     const r = await sendBrevoEmail({

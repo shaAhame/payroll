@@ -53,7 +53,7 @@ export function toSavePayload(r: EngineResult, snap: Snapshot) {
       })),
       formulas: {
         epfSalaryBasis: "Basic Salary + BRA 2 + BRA 1",
-        dailySalaryBasis: "Basic Salary + BRA 2 + BRA 1 + Performance Incentive",
+        dailySalaryBasis: "Basic Salary + BRA 2 + BRA 1",
         dailySalaryRate: "Daily Salary Basis ÷ " + (r.dailyRateDivisor.toString()),
         netSalary: "Total Earnings − Total Deductions",
       },

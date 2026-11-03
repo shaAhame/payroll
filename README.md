@@ -32,7 +32,7 @@ All salary figures are produced by one server-side engine, `src/lib/payroll/engi
 |---|---|
 | EPF Salary Basis | Basic Salary + BRA 2 + BRA 1 (Performance Incentive is **never** included) |
 | Employee EPF | EPF Salary Basis × 8% |
-| Daily Salary Basis | Basic Salary + BRA 2 + BRA 1 + Performance Incentive |
+| Daily Salary Basis | Basic Salary + BRA 2 + BRA 1 (Performance Incentive is **not** included) |
 | Daily Salary Rate | Daily Salary Basis ÷ Allocated Working Days |
 | Additional Working Days | max(0, Actual − Allocated) → × Daily Rate = Additional Working Pay (earning) |
 | Additional Off Days | max(0, Allocated − Actual) → × Daily Rate = No-Pay Leave (deduction) |
@@ -43,7 +43,7 @@ All salary figures are produced by one server-side engine, `src/lib/payroll/engi
 
 Guarantees enforced in code and in the database:
 
-- Performance Incentive appears once in Total Earnings, even though it is part of the daily basis.
+- Performance Incentive is in neither calculation basis; it appears once in Total Earnings. The two bases are stored and calculated separately so either can change independently in future.
 - Additional working pay and no-pay leave are the *same* monthly adjustment — the database rejects a record that has both.
 - A "No-Pay Leave" attendance status only reduces actual days; it is never deducted a second time.
 - Employer EPF (12%) and ETF (3%) are calculated and reported but never deducted from the employee.
@@ -56,8 +56,8 @@ Named engine functions: `calculateEPFSalary`, `calculateEmployeeEPF`, `calculate
 combines them for one employee-month).
 
 **Specification test case** (`tests/engine.test.ts`): Basic 40,000 · BRA 2 5,000 · BRA 1 3,000 · Performance
-Incentive 2,000 · 25 allocated days → EPF basis 48,000 · EPF 3,840 · Daily basis 50,000 · Daily rate 2,000 ·
-27 days → +4,000 · 23 days → −4,000 · 25 days → no adjustment. All pass.
+Incentive 2,000 · 25 allocated days → EPF basis 48,000 · EPF 3,840 · Daily basis 48,000 · Daily rate 1,920 ·
+27 days → +3,840 · 23 days → −3,840 · 25 days → no adjustment · Total earnings 50,000 (incentive counted once). All pass.
 
 ## 2. Configurable rules and their defaults
 
@@ -71,7 +71,7 @@ rather than an invented policy. Changing a setting recalculates open payroll; fi
 | Rounding | Final amounts only | Daily rate kept at full precision; amounts rounded half-up to 2 dp. Optional: round the rate first |
 | Approved leave | Paid (counts as worked) | Or unpaid |
 | Weekly off / public holiday | Neutral (not counted) | Allocations are expected to exclude offs and holidays. Working on an off day = a present day, so it becomes an additional working day |
-| Monthly incentive records | Added to the structure's incentive | Or replace it. Both feed the daily basis, never EPF |
+| Monthly incentive records | Added to the structure's incentive | Or replace it. Paid as earnings only — never part of the daily or EPF basis |
 | Late deduction | 250 / 500, threshold 15 min, grace 0 | Frequency per incident (default) or once per month; optional monthly cap |
 | Additional-day / no-pay multipliers | 1 × daily rate | |
 | EPF / employer EPF / ETF | 8% / 12% / 3% | |
@@ -207,7 +207,7 @@ right away. On Vercel Pro you could instead change the `vercel.json` schedule to
 ### 4.13 Test automated payslip delivery (on a staging project first)
 1. Run `supabase/optional/fictional-test-data.sql` on a **staging** project only (creates a fictional branch and employee — change the email to an inbox you own).
 2. Settings: set company details and logo; in Email Settings check "API status: Connected" and send a **test email**.
-3. Payroll → *Process payroll* for January 2026 → open the employee → confirm: EPF basis 48,000; EPF 3,840; daily basis 50,000; additional working pay 4,000; late 750; net 49,410.
+3. Payroll → *Process payroll* for January 2026 → open the employee → confirm: EPF basis 48,000; EPF 3,840; daily basis 48,000; daily rate 1,920; additional working pay 3,840; late 750; total earnings 53,840; net 49,250.
 4. Submit → Approve → Finalize. The payslip appears under *Payslips*; the email appears under *Email Notifications* as **Sent**, then **Delivered** once Brevo's webhook arrives.
 5. Try *Resend* (confirmation; refused within 10 minutes of the last send) and the employee portal (invite the employee as an Employee user).
 

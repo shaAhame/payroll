@@ -150,7 +150,7 @@ export default async function EmployeeProfile({ params, searchParams }: {
                     <TD className="num">{formatAmount(s.bra1)}</TD>
                     <TD className="num">{formatAmount(s.performance_incentive)}</TD>
                     <TD className="num">{formatAmount(calculateEPFSalary({ basicSalary: s.basic_salary, bra2: s.bra2, bra1: s.bra1 }).toFixed(2))}</TD>
-                    <TD className="num">{formatAmount(calculateDailySalaryBasis({ basicSalary: s.basic_salary, bra2: s.bra2, bra1: s.bra1, performanceIncentive: s.performance_incentive }).toFixed(2))}</TD>
+                    <TD className="num">{formatAmount(calculateDailySalaryBasis({ basicSalary: s.basic_salary, bra2: s.bra2, bra1: s.bra1 }).toFixed(2))}</TD>
                     <TD className="max-w-xs truncate text-muted-foreground">{s.notes ?? ""}</TD>
                   </TR>
                 ))}
@@ -171,7 +171,7 @@ export default async function EmployeeProfile({ params, searchParams }: {
 
 function CalculationBases({ s }: { s: { basic_salary: string; bra2: string; bra1: string; performance_incentive: string; effective_from: string } }) {
   const epf = calculateEPFSalary({ basicSalary: s.basic_salary, bra2: s.bra2, bra1: s.bra1 });
-  const daily = calculateDailySalaryBasis({ basicSalary: s.basic_salary, bra2: s.bra2, bra1: s.bra1, performanceIncentive: s.performance_incentive });
+  const daily = calculateDailySalaryBasis({ basicSalary: s.basic_salary, bra2: s.bra2, bra1: s.bra1 });
   return (
     <>
       <Section title="EPF Salary Basis" description="Basic Salary + BRA 2 + BRA 1">
@@ -183,11 +183,13 @@ function CalculationBases({ s }: { s: { basic_salary: string; bra2: string; bra1
           <KV label="Employee EPF 8%" value={formatLKR(calculateEmployeeEPF(epf).toFixed(2))} mono />
         </div>
       </Section>
-      <Section title="Daily Salary Calculation Basis" description="Basic Salary + BRA 2 + BRA 1 + Performance Incentive">
+      <Section title="Daily Salary Calculation Basis" description="Basic Salary + BRA 2 + BRA 1">
         <div className="divide-y divide-border px-5 py-2">
-          <KV label="Basic + BRA 2 + BRA 1" value={formatAmount(epf.toFixed(2))} mono />
-          <KV label="Performance Incentive" value={formatAmount(s.performance_incentive)} mono />
+          <KV label="Basic Salary" value={formatAmount(s.basic_salary)} mono />
+          <KV label="BRA 2" value={formatAmount(s.bra2)} mono />
+          <KV label="BRA 1" value={formatAmount(s.bra1)} mono />
           <KV label="Daily Salary Basis" value={<strong>{formatLKR(daily.toFixed(2))}</strong>} mono />
+          <KV label="Performance Incentive (paid separately)" value={formatAmount(s.performance_incentive)} mono />
           <KV label="Effective from" value={formatDate(s.effective_from)} />
         </div>
         <p className="px-5 pb-4 text-xs text-muted-foreground">Daily rate = Daily Salary Basis ÷ allocated working days for the month.</p>

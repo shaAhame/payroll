@@ -106,7 +106,7 @@ export default async function RecordPage({ params }: { params: Promise<{ periodI
             <KV label="Employer ETF (not deducted)" value={formatLKR(r.employer_etf)} mono />
           </div>
         </Section>
-        <Section title="Daily salary calculation" description="Basic + BRA 2 + BRA 1 + Performance Incentive">
+        <Section title="Daily salary calculation" description="Basic + BRA 2 + BRA 1 (no Performance Incentive)">
           <div className="divide-y divide-border px-5 py-2">
             <KV label="Daily Salary Basis" value={formatLKR(r.daily_salary_basis)} mono />
             <KV label={`Daily Salary Rate (÷ ${formatDays(b.dailyRateDivisor ?? r.allocated_working_days)})`} value={formatLKR(Number(r.daily_salary_rate).toFixed(2))} mono />

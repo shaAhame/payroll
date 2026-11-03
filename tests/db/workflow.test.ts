@@ -107,16 +107,17 @@ describe("calculation persistence and stale detection", () => {
     const r = await calcAndSave();
     const rec = await one<Record<string, string | boolean>>("select * from payroll_records where id = $1", [recordId]);
     expect(rec.epf_salary_basis).toBe("48000.00");
-    expect(rec.daily_salary_basis).toBe("50000.00");
-    expect(rec.additional_working_pay).toBe("4000.00");
+    expect(rec.daily_salary_basis).toBe("48000.00");
+    expect(rec.daily_salary_rate).toBe("1920.0000");
+    expect(rec.additional_working_pay).toBe("3840.00");
     expect(rec.no_pay_leave).toBe("0.00");
     expect(rec.late_deduction).toBe("750.00");
     expect(rec.employee_epf).toBe("3840.00");
-    // 50,000 + 4,000 + 1,500 commission
-    expect(rec.total_earnings).toBe("55500.00");
+    // 48,000 + 2,000 incentive + 3,840 additional working pay + 1,500 commission
+    expect(rec.total_earnings).toBe("55340.00");
     // 3,840 EPF + 750 late + 5,000 advance + 2,500 loan
     expect(rec.total_deductions).toBe("12090.00");
-    expect(rec.net_salary).toBe("43410.00");
+    expect(rec.net_salary).toBe("43250.00");
     expect(rec.net_salary).toBe(r.netSalary.toFixed(2));
     expect(rec.needs_recalculation).toBe(false);
     const n = await one<{ e: number; d: number }>("select (select count(*)::int from payroll_earnings where payroll_record_id = $1) e, (select count(*)::int from payroll_deductions where payroll_record_id = $1) d", [recordId]);
