@@ -114,7 +114,7 @@ refused while one is in flight or was sent in the last 10 minutes.
 ## 4. Deployment, step by step
 
 ### 4.1 Create the Supabase project
-1. Create a project at supabase.com (region close to Sri Lanka, e.g. Singapore or Mumbai).
+1. Create a project at supabase.com in the **South Asia (Mumbai)** region. Vercel functions are pinned to Mumbai (`bom1`) in `vercel.json`, so app and database sit in the same city. If you choose another Supabase region, change `regions` in `vercel.json` to match.
 2. *Project Settings → API*: copy the **Project URL**, **anon key** and **service_role key**.
 
 ### 4.2 Run the database migrations
