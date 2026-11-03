@@ -52,7 +52,7 @@ export default async function PayslipsPage({ searchParams }: { searchParams: Pro
         <StatCard label="Failed" value={count("failed")} tone={count("failed") ? "danger" : "default"} hint="retried automatically up to 5 times" />
       </div>
       <Section title={`Payslips · ${formatMonth(month)}`} actions={<FilterBar filters={[
-        { name: "month", label: "Month", type: "month" },
+        { name: "month", label: "Month", type: "month", defaultValue: month },
         { name: "branch", label: "Branch", type: "select", options: branches.map((b) => ({ value: b.id, label: b.name })) },
         { name: "status", label: "Status", type: "select", options: [{ value: "generated", label: "Generated" }, { value: "pending", label: "Pending" }, { value: "failed", label: "Failed" }] },
         { name: "q", label: "Search", type: "text", placeholder: "Name, ID or reference" },

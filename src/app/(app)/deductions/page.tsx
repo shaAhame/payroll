@@ -57,7 +57,7 @@ export default async function DeductionsPage({ searchParams }: { searchParams: P
             defaultValues={{ employee_id: "", payroll_month: month.slice(0, 7), amount: "", reason: "", reference: "" }} />
         } />
       <LinkTabs tabs={[{ key: "summary", label: "By category" }, { key: "lines", label: "All payroll deductions" }, { key: "manual", label: "Authorized manual deductions" }]} active={tab} base={`/deductions?month=${month.slice(0, 7)}`} />
-      <div className="mb-4"><FilterBar filters={[{ name: "month", label: "Payroll month", type: "month" }, ...(tab === "lines" ? [{ name: "category", label: "Category", type: "select" as const, options: CATEGORY_ORDER.map((c) => ({ value: c, label: titleCase(c) })) }] : [])]} /></div>
+      <div className="mb-4"><FilterBar filters={[{ name: "month", label: "Payroll month", type: "month", defaultValue: month }, ...(tab === "lines" ? [{ name: "category", label: "Category", type: "select" as const, options: CATEGORY_ORDER.map((c) => ({ value: c, label: titleCase(c) })) }] : [])]} /></div>
 
       {tab === "summary" && (
         <Section title={`Deductions by category · ${formatMonth(month)}`}>

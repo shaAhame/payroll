@@ -32,7 +32,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     designation: filters.designation, payroll_status: filters.payrollStatus, email_status: filters.emailStatus }).filter(([, v]) => v) as [string, string][]).toString();
 
   const defs: Record<string, FilterDef> = {
-    month: { name: "month", label: "Month", type: "month" },
+    month: { name: "month", label: "Month", type: "month", defaultValue: filters.month },
     year: { name: "year", label: "Year", type: "select", options: Array.from({ length: 6 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => ({ value: y, label: y })) },
     branch: { name: "branch", label: "Branch", type: "select", options: branches.map((b) => ({ value: b.id, label: b.name })) },
     employee: { name: "employee", label: "Employee", type: "select", options: employeeOptions(employees, branches) },

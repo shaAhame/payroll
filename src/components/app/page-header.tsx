@@ -4,12 +4,12 @@ export function PageHeader({ title, description, actions, className }: {
   title: string; description?: React.ReactNode; actions?: React.ReactNode; className?: string;
 }) {
   return (
-    <div className={cn("mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between", className)}>
+    <div className={cn("mb-5 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div className="min-w-0">
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+        {description && <div className="mt-1 text-sm text-muted-foreground">{description}</div>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="flex min-w-0 flex-wrap items-center gap-2 [&>*]:max-w-full">{actions}</div>}
     </div>
   );
 }
@@ -18,13 +18,13 @@ export function Section({ title, description, actions, children, className }: {
   title: string; description?: string; actions?: React.ReactNode; children: React.ReactNode; className?: string;
 }) {
   return (
-    <section className={cn("rounded-xl border border-border bg-card shadow-card", className)}>
-      <div className="flex flex-col gap-2 border-b border-border px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+    <section className={cn("min-w-0 rounded-xl border border-border bg-card shadow-card", className)}>
+      <div className="flex min-w-0 flex-col gap-2 border-b border-border px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="min-w-0">
           <h2 className="text-[15px] font-semibold">{title}</h2>
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
-        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+        {actions && <div className="flex min-w-0 flex-wrap gap-2">{actions}</div>}
       </div>
       {children}
     </section>
@@ -45,11 +45,11 @@ export function StatCard({ label, value, hint, tone = "default" }: {
   label: string; value: React.ReactNode; hint?: React.ReactNode; tone?: "default" | "danger" | "warning" | "success";
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card px-4 py-3.5 shadow-card">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+    <div className="min-w-0 rounded-xl border border-border bg-card px-3.5 py-3 shadow-card sm:px-4 sm:py-3.5">
+      <div className="text-xs font-medium leading-snug text-muted-foreground">{label}</div>
       <div
         className={cn(
-          "mt-1.5 text-xl font-semibold tracking-tight tabular-nums",
+          "mt-1.5 break-words text-lg font-semibold tracking-tight tabular-nums sm:text-xl",
           tone === "danger" && "text-destructive", tone === "warning" && "text-warning", tone === "success" && "text-success",
         )}
       >

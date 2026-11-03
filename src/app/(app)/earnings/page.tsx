@@ -69,7 +69,7 @@ export default async function EarningsPage({ searchParams }: { searchParams: Pro
         } />
       <Section title={`Earnings for ${formatMonth(month)}`} description="Monthly performance-incentive records are added to the salary-structure incentive (configurable) and paid once as an earning; they are not part of the EPF or daily salary basis."
         actions={<FilterBar filters={[
-          { name: "month", label: "Payroll month", type: "month" },
+          { name: "month", label: "Payroll month", type: "month", defaultValue: month },
           ...(profile.role !== "branch_manager" ? [{ name: "branch", label: "Branch", type: "select" as const, options: branches.map((b) => ({ value: b.id, label: b.name })) }] : []),
           { name: "category", label: "Category", type: "select", options: CATEGORIES },
           { name: "status", label: "Status", type: "select", options: ["pending", "approved", "rejected", "cancelled", "included_in_payroll", "finalized"].map((s) => ({ value: s, label: titleCase(s) })) },

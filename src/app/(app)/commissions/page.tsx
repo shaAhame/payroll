@@ -64,7 +64,7 @@ export default async function CommissionsPage({ searchParams }: { searchParams: 
       </div>
       <Section title={`${sp(params.view) === "releases" ? "Releases recovered in" : "Commissions for"} ${formatMonth(month)}`}
         actions={<FilterBar filters={[
-          { name: "month", label: "Payroll month", type: "month" },
+          { name: "month", label: "Payroll month", type: "month", defaultValue: month },
           { name: "view", label: "View", type: "select", options: [{ value: "releases", label: "Releases to recover this month" }] },
           ...(profile.role !== "branch_manager" ? [{ name: "branch", label: "Branch", type: "select" as const, options: branches.map((b) => ({ value: b.id, label: b.name })) }] : []),
           { name: "type", label: "Type", type: "select", options: COMMISSION_TYPES },

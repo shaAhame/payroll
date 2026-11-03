@@ -17,7 +17,7 @@ export default async function MyAttendance({ searchParams }: { searchParams: Pro
   const { data } = await supabase.from("attendance").select("*").gte("work_date", month).lte("work_date", monthEnd(month)).order("work_date");
   return (
     <>
-      <PageHeader title="My Attendance" description={formatMonth(month)} actions={<FilterBar filters={[{ name: "month", label: "Month", type: "month" }]} />} />
+      <PageHeader title="My Attendance" description={formatMonth(month)} actions={<FilterBar filters={[{ name: "month", label: "Month", type: "month", defaultValue: month }]} />} />
       <Section title="Daily attendance">
         {!data?.length ? <EmptyState title="No attendance recorded for this month" /> : (
           <Table>

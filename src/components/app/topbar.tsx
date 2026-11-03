@@ -39,20 +39,34 @@ export function GlobalSearch() {
   );
 }
 
-export function MonthSwitcher({ month }: { month: string }) {
+export function MonthSwitcher({ month, dark }: { month: string; dark?: boolean }) {
   const [pending, start] = useTransition();
+  const input = (
+    <input
+      type="month"
+      className="h-9 min-w-0 flex-1 bg-transparent outline-none disabled:opacity-50"
+      defaultValue={month.slice(0, 7)}
+      disabled={pending}
+      onChange={(e) => e.target.value && start(() => setSelectedMonth(e.target.value))}
+      aria-label="Selected payroll month"
+    />
+  );
+  if (dark) {
+    return (
+      <label className="block">
+        <span className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-white/50">Payroll month</span>
+        <span className="flex items-center gap-2 rounded-md border border-white/15 bg-white/5 px-2.5 text-base text-white [color-scheme:dark]">
+          <CalendarDays className="h-4 w-4 shrink-0 text-white/60" />
+          {input}
+        </span>
+      </label>
+    );
+  }
   return (
     <label className="flex items-center gap-2 rounded-md border border-input bg-card px-2.5 text-sm shadow-xs">
       <CalendarDays className="h-4 w-4 text-muted-foreground" />
       <span className="sr-only">Payroll month</span>
-      <input
-        type="month"
-        className="h-9 bg-transparent text-sm outline-none disabled:opacity-50"
-        defaultValue={month.slice(0, 7)}
-        disabled={pending}
-        onChange={(e) => e.target.value && start(() => setSelectedMonth(e.target.value))}
-        aria-label="Selected payroll month"
-      />
+      {input}
     </label>
   );
 }
@@ -95,7 +109,7 @@ export function UserMenu({ name, email, roleLabel, accountHref = "/account" }: {
   const initials = name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 rounded-md p-1 pr-2 hover:bg-muted" aria-label="Account menu">
+      <DropdownMenuTrigger className="flex items-center gap-2 rounded-md p-1 hover:bg-muted sm:pr-2" aria-label="Account menu">
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">{initials}</span>
         <span className="hidden text-left leading-tight sm:block">
           <span className="block text-sm font-medium">{name}</span>

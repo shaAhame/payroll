@@ -75,7 +75,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         actions={
           <FilterBar
             filters={[
-              { name: "month", label: "Month", type: "month" },
+              { name: "month", label: "Month", type: "month", defaultValue: month },
               ...(isAdmin ? [{ name: "branch", label: "Branch", type: "select" as const, options: branches.map((b) => ({ value: b.id, label: b.name })) }] : []),
             ]}
           />

@@ -87,7 +87,7 @@ async function Daily({ params, today, branchFilter, empOptions, isAdmin, branche
       )}
       <Section title={employee ? `${empOptions.find((e) => e.value === employee)?.label ?? "Employee"} · ${formatMonth(month)}` : `Attendance for ${formatDate(date)}`}
         actions={<FilterBar filters={[
-          ...(employee ? [{ name: "month", label: "Month", type: "month" as const }] : [{ name: "date", label: "Date", type: "date" as const }]),
+          ...(employee ? [{ name: "month", label: "Month", type: "month" as const, defaultValue: month }] : [{ name: "date", label: "Date", type: "date" as const, defaultValue: date }]),
           ...(!isBM ? [{ name: "branch", label: "Branch", type: "select" as const, options: branches.map((b) => ({ value: b.id, label: b.name })) }] : []),
           { name: "status", label: "Status", type: "select", options: [{ value: "present", label: "Present" }, { value: "absent", label: "Absent" }, { value: "no_pay_leave", label: "No-Pay Leave" }, { value: "approved_leave", label: "Approved Leave" }, { value: "weekly_off", label: "Weekly Off" }, { value: "public_holiday", label: "Public Holiday" }] },
           { name: "late", label: "Late only", type: "select", options: [{ value: "1", label: "Late arrivals" }] },
@@ -153,7 +153,7 @@ async function Monthly({ month, branchFilter, branches, isBM }: { month: string;
   const rows = (summary ?? []).map((r) => ({ ...r, e: emp.get(r.employee_id) })).filter((r) => r.e).sort((a, b) => a.e!.employee_code.localeCompare(b.e!.employee_code));
   return (
     <Section title={`Monthly summary · ${formatMonth(month)}`} description="Actual working days follow the leave/holiday treatment in Payroll Settings."
-      actions={<FilterBar filters={[{ name: "month", label: "Month", type: "month" }, ...(!isBM ? [{ name: "branch", label: "Branch", type: "select" as const, options: branches.map((b) => ({ value: b.id, label: b.name })) }] : [])]} />}>
+      actions={<FilterBar filters={[{ name: "month", label: "Month", type: "month", defaultValue: month }, ...(!isBM ? [{ name: "branch", label: "Branch", type: "select" as const, options: branches.map((b) => ({ value: b.id, label: b.name })) }] : [])]} />}>
       {!rows.length ? <EmptyState title="No attendance for this month" /> : (
         <Table>
           <THead><TR><TH>Employee</TH><TH className="text-right">Present</TH><TH className="text-right">Approved leave</TH><TH className="text-right">Weekly off</TH><TH className="text-right">Holidays</TH><TH className="text-right">Absent</TH><TH className="text-right">No-pay</TH><TH className="text-right">Late</TH>{!isBM && <><TH className="text-right">Allocated</TH><TH className="text-right">Actual</TH><TH className="text-right">Difference</TH></>}</TR></THead>
@@ -190,7 +190,7 @@ async function Allocations({ month, branches, empOptions }: { month: string; bra
       <Section title={`Working-day allocation · ${formatMonth(month)}`}
         description={`Priority: employee allocation → branch allocation for the month → branch default → company default (${formatDays(settings?.default_working_days)} days).`}
         actions={<>
-          <FilterBar filters={[{ name: "month", label: "Month", type: "month" }]} />
+          <FilterBar filters={[{ name: "month", label: "Month", type: "month", defaultValue: month }]} />
           <FormDialog trigger={<Button size="sm" className="self-end">Set allocation</Button>} title="Set allocated working days" schema="allocation" action={saveAllocation}
             fields={[
               { name: "payroll_month", label: "Payroll month", type: "month", required: true },
