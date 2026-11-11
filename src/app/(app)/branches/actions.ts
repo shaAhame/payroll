@@ -46,3 +46,15 @@ export async function saveShift(id: string | null, input: unknown) {
     return { ok: true as const, message: "Shift saved" };
   });
 }
+
+export async function deleteShift(id: string) {
+  return runAction(async () => {
+    const profile = await requireRole(["super_admin", "hr_manager"]);
+    const supabase = await createClient();
+    const before = check(await supabase.from("shifts").select("*").eq("id", id).single());
+    check(await supabase.from("shifts").delete().eq("id", id));
+    await logAudit({ actorId: profile.id, action: "shift.deleted", entityType: "shift", entityId: id, oldValues: before });
+    revalidatePath("/branches");
+    return { ok: true as const, message: "Shift deleted" };
+  });
+}

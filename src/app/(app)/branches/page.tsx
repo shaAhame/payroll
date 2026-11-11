@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { EmptyState, PageHeader, Section } from "@/components/app/page-header";
@@ -10,7 +10,7 @@ import { ADMIN_ROLES, requirePageRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSelectedMonth } from "@/lib/month";
 import { formatAmount, formatDays, formatMonth } from "@/lib/format";
-import { saveBranch, saveShift, setBranchActive } from "./actions";
+import { deleteShift, saveBranch, saveShift, setBranchActive } from "./actions";
 
 export const metadata = { title: "Branch Management" };
 
@@ -21,7 +21,7 @@ export default async function BranchesPage() {
   const month = await getSelectedMonth();
   const [{ data: branches }, { data: shifts }, { data: managers }, { data: emps }, { data: summary }, { data: settings }] = await Promise.all([
     supabase.from("branches").select("*, shifts!branches_default_shift_fk(name, start_time, end_time)").order("name"),
-    supabase.from("shifts").select("*, branches(name)").order("name"),
+    supabase.from("shifts").select("*, branches!shifts_branch_id_fkey(name)").order("name"),
     supabase.from("profiles").select("id, full_name, role").in("role", ["branch_manager", "super_admin", "hr_manager"]).eq("is_active", true),
     supabase.from("employees").select("branch_id, employment_status").limit(10000),
     supabase.from("v_payroll_monthly_branch").select("*").eq("payroll_month", month),
@@ -77,7 +77,7 @@ export default async function BranchesPage() {
           </Table>
         )}
       </Section>
-      <Section className="mt-4" title="Shift schedules" description="Shift start times are used to calculate late arrivals."
+      <Section className="mt-4" title="Shift schedules" description="A branch can have several shifts. Each employee gets one on their profile; employees without one use the branch default. Late arrivals are counted from the shift start."
         actions={<FormDialog trigger={<Button size="sm"><Plus /> Add shift</Button>} title="Add shift" schema="shift" action={saveShift.bind(null, null)}
           fields={[{ name: "name", label: "Shift name", type: "text", required: true }, { name: "branch_id", label: "Branch", type: "select", options: (branches ?? []).map((b) => ({ value: b.id, label: b.name })), placeholder: "All branches" },
             { name: "start_time", label: "Start time", type: "time", required: true }, { name: "end_time", label: "End time", type: "time", required: true }]}
@@ -89,10 +89,14 @@ export default async function BranchesPage() {
               <TR key={s.id}>
                 <TD className="font-medium">{s.name}</TD><TD>{s.branches?.name ?? "All branches"}</TD><TD>{s.start_time.slice(0, 5)}</TD><TD>{s.end_time.slice(0, 5)}</TD>
                 <TD className="text-right">
+                  <div className="flex justify-end gap-1">
+                  <ActionButton size="icon" variant="ghost" aria-label="Delete shift" action={deleteShift.bind(null, s.id)}
+                    confirm={{ title: `Delete ${s.name}?`, description: "Employees on this shift fall back to their branch's default shift. Attendance already recorded keeps its shift start time.", destructive: true, confirmLabel: "Delete" }}><Trash2 /></ActionButton>
                   <FormDialog trigger={<Button size="icon" variant="ghost" aria-label="Edit"><Pencil /></Button>} title="Edit shift" schema="shift" action={saveShift.bind(null, s.id)}
                     fields={[{ name: "name", label: "Shift name", type: "text", required: true }, { name: "branch_id", label: "Branch", type: "select", options: (branches ?? []).map((b) => ({ value: b.id, label: b.name })), placeholder: "All branches" },
                       { name: "start_time", label: "Start time", type: "time", required: true }, { name: "end_time", label: "End time", type: "time", required: true }]}
                     defaultValues={{ name: s.name, branch_id: s.branch_id ?? "", start_time: s.start_time.slice(0, 5), end_time: s.end_time.slice(0, 5) }} />
+                  </div>
                 </TD>
               </TR>
             ))}

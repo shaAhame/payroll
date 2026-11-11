@@ -7,7 +7,7 @@ export async function loadEmployeeFormOptions(supabase: SupabaseClient) {
   const [branches, departments, shifts] = await Promise.all([
     listBranches(supabase),
     supabase.from("departments").select("id, name").eq("is_active", true).order("name"),
-    supabase.from("shifts").select("id, name, start_time, end_time, branch_id, branches(name)").eq("is_active", true).order("name"),
+    supabase.from("shifts").select("id, name, start_time, end_time, branch_id, branches!shifts_branch_id_fkey(name)").eq("is_active", true).order("name"),
   ]);
   return {
     branches: branchOptions(branches),

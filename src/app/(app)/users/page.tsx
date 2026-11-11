@@ -18,7 +18,7 @@ export default async function UsersPage() {
   const me = await requirePageRole(["super_admin"]);
   const supabase = await createClient();
   const [{ data: users }, branches, employees] = await Promise.all([
-    supabase.from("profiles").select("*, branches(name), employees(employee_code, full_name)").order("role").order("full_name"),
+    supabase.from("profiles").select("*, branches!profiles_branch_id_fkey(name), employees!profiles_employee_id_fkey(employee_code, full_name)").order("role").order("full_name"),
     listBranches(supabase), listEmployeesLite(supabase),
   ]);
   const fields = (edit: boolean): FieldDef[] => [
