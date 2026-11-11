@@ -56,7 +56,10 @@ export function SchemaForm({ schema, fields, defaultValues, action, submitLabel 
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const form = useForm<FieldValues>({
-    resolver: zodResolver(SCHEMAS[schema] as never) as Resolver<FieldValues>,
+    // raw: validate in the browser but submit the values as typed. The server action
+    // parses them again with the same schema; parsing already-converted values
+    // (blank → null, percent → fraction) a second time would reject or change them.
+    resolver: zodResolver(SCHEMAS[schema] as never, undefined, { raw: true }) as Resolver<FieldValues>,
     defaultValues,
   });
   const { register, handleSubmit, control, formState, watch, reset } = form;
