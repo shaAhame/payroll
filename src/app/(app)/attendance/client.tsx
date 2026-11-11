@@ -11,9 +11,12 @@ import { SchemaForm, type Option } from "@/components/app/schema-form";
 import { ATTENDANCE_STATUS } from "@/lib/options";
 import { bulkMarkStatus, importAttendance, saveAttendance } from "./actions";
 
-export function AttendanceDialog({ employees, initial, id, triggerLabel, icon }: {
+export function AttendanceDialog({ employees, initial, id, triggerLabel, icon, shiftStarts = {} }: {
   employees: Option[]; initial: Record<string, unknown>; id?: string; triggerLabel?: string; icon?: "edit" | "add";
+  /** employee id → their shift start "HH:MM" (own shift, else the branch default) */
+  shiftStarts?: Record<string, string>;
 }) {
+  const autoFill = { field: "employee_id", values: Object.fromEntries(Object.entries(shiftStarts).map(([emp, t]) => [emp, { shift_start_time: t }])) };
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -31,11 +34,12 @@ export function AttendanceDialog({ employees, initial, id, triggerLabel, icon }:
             schema="attendance"
             action={(v) => saveAttendance(v, id)}
             onSuccess={() => setOpen(false)}
+            autoFill={autoFill}
             fields={[
               { name: "employee_id", label: "Employee", type: "select", options: employees, required: true, full: true, disabled: !!id },
               { name: "work_date", label: "Working date", type: "date", required: true, disabled: !!id },
               { name: "status", label: "Status", type: "select", options: ATTENDANCE_STATUS, required: true },
-              { name: "shift_start_time", label: "Shift start", type: "time", hint: "Blank = employee's allocated shift", showWhen: { field: "status", in: ["present"] } },
+              { name: "shift_start_time", label: "Shift start", type: "time", hint: "Filled from the employee's shift. Change it if they worked a different shift that day.", showWhen: { field: "status", in: ["present"] } },
               { name: "check_in_time", label: "Check-in", type: "time", required: true, showWhen: { field: "status", in: ["present"] } },
               { name: "check_out_time", label: "Check-out", type: "time", showWhen: { field: "status", in: ["present"] } },
               { name: "is_additional_working_day", label: "Worked on an off day", type: "switch", showWhen: { field: "status", in: ["present"] } },

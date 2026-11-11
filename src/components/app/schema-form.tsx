@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, type FieldValues, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -41,7 +41,17 @@ function groupOptions(options: Option[]) {
   return groups;
 }
 
-export function SchemaForm({ schema, fields, defaultValues, action, submitLabel = "Save", onSuccess, redirectTo, resetOnSuccess, extraData, className }: {
+/**
+ * Fill other fields from a lookup when one field changes, e.g. picking an employee
+ * fills their shift start. On first render only empty fields are filled; on a later
+ * change of the source field the looked-up values replace what is there.
+ */
+export interface AutoFill {
+  field: string;
+  values: Record<string, Record<string, string>>;
+}
+
+export function SchemaForm({ schema, fields, defaultValues, action, submitLabel = "Save", onSuccess, redirectTo, resetOnSuccess, extraData, className, autoFill }: {
   schema: SchemaKey;
   fields: FieldDef[];
   defaultValues: Record<string, unknown>;
@@ -52,6 +62,7 @@ export function SchemaForm({ schema, fields, defaultValues, action, submitLabel 
   resetOnSuccess?: boolean;
   extraData?: Record<string, unknown>;
   className?: string;
+  autoFill?: AutoFill;
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -62,8 +73,26 @@ export function SchemaForm({ schema, fields, defaultValues, action, submitLabel 
     resolver: zodResolver(SCHEMAS[schema] as never, undefined, { raw: true }) as Resolver<FieldValues>,
     defaultValues,
   });
-  const { register, handleSubmit, control, formState, watch, reset } = form;
+  const { register, handleSubmit, control, formState, watch, reset, setValue, getValues } = form;
   const values = watch();
+
+  const autoSource = autoFill ? String(values[autoFill.field] ?? "") : "";
+  const lastSource = useRef<string | null>(null);
+  useEffect(() => {
+    if (!autoFill) return;
+    const firstRun = lastSource.current === null;
+    if (!firstRun && lastSource.current === autoSource) return;
+    lastSource.current = autoSource;
+    const fill = autoFill.values[autoSource] ?? {};
+    for (const [name, value] of Object.entries(fill)) {
+      if (firstRun && getValues(name)) continue; // keep a value that is already there (editing)
+      setValue(name, value, { shouldDirty: !firstRun, shouldValidate: false });
+    }
+    if (!firstRun && !autoFill.values[autoSource]) {
+      // new choice with nothing to look up: clear what the previous choice filled
+      for (const name of new Set(Object.values(autoFill.values).flatMap((v) => Object.keys(v)))) setValue(name, "");
+    }
+  }, [autoFill, autoSource, getValues, setValue]);
 
   const onSubmit = handleSubmit(async (data) => {
     setServerError(null);

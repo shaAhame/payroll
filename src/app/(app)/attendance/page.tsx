@@ -30,6 +30,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
     listBranches(supabase), listEmployeesLite(supabase, { branchId: branchFilter }), resolveMonth(params.month),
   ]);
   const empOptions = employeeOptions(employees, branches);
+  const shiftStarts = await loadShiftStarts(supabase, employees.map((e) => e.id));
   const tabs = [
     { key: "daily", label: "Daily attendance" }, { key: "monthly", label: "Monthly summary" },
     ...(isAdmin ? [{ key: "allocations", label: "Working-day allocation" }] : []), { key: "import", label: "Import" },
@@ -41,10 +42,10 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
       <PageHeader title="Attendance Management" description="Attendance drives actual working days, additional working pay, no-pay leave and late deductions."
         actions={<>
           <BulkMarkDialog branches={profile.role === "branch_manager" ? [] : branchOptions(branches)} defaultDate={sp(params.date) || today} />
-          <AttendanceDialog employees={empOptions} initial={{ work_date: sp(params.date) || today, employee_id: "" }} />
+          <AttendanceDialog employees={empOptions} shiftStarts={shiftStarts} initial={{ work_date: sp(params.date) || today, employee_id: "" }} />
         </>} />
       <LinkTabs tabs={tabs} active={tab} base={`/attendance?${new URLSearchParams(Object.entries(params).filter(([k, v]) => k !== "tab" && typeof v === "string") as [string, string][]).toString()}`} />
-      {tab === "daily" && <Daily params={params} today={today} branchFilter={branchFilter} empOptions={empOptions} isAdmin={isAdmin} branches={branches} isBM={profile.role === "branch_manager"} month={month} />}
+      {tab === "daily" && <Daily params={params} today={today} branchFilter={branchFilter} empOptions={empOptions} shiftStarts={shiftStarts} isAdmin={isAdmin} branches={branches} isBM={profile.role === "branch_manager"} month={month} />}
       {tab === "monthly" && <Monthly month={month} branchFilter={branchFilter} branches={branches} isBM={profile.role === "branch_manager"} />}
       {tab === "allocations" && isAdmin && <Allocations month={month} branches={branches} empOptions={empOptions} />}
       {tab === "import" && <Section title="Import attendance from Excel or CSV"><ImportPanel isBranchManager={profile.role === "branch_manager"} /></Section>}
@@ -52,8 +53,8 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
   );
 }
 
-async function Daily({ params, today, branchFilter, empOptions, isAdmin, branches, isBM, month }: {
-  params: Record<string, string | string[] | undefined>; today: string; branchFilter: string | null; empOptions: { value: string; label: string }[];
+async function Daily({ params, today, branchFilter, empOptions, shiftStarts, isAdmin, branches, isBM, month }: {
+  params: Record<string, string | string[] | undefined>; today: string; branchFilter: string | null; empOptions: { value: string; label: string }[]; shiftStarts: Record<string, string>;
   isAdmin: boolean; branches: { id: string; name: string }[]; isBM: boolean; month: string;
 }) {
   const supabase = await createClient();
@@ -112,7 +113,7 @@ async function Daily({ params, today, branchFilter, empOptions, isAdmin, branche
                         ? <ActionButton size="sm" variant="ghost" action={setLateWaiver.bind(null, a.id, false)}>Unwaive</ActionButton>
                         : <ActionButton size="sm" variant="ghost" action={setLateWaiver.bind(null, a.id, true)} reason={{ label: "Reason for waiving" }}
                             confirm={{ title: "Waive late deduction?", description: `${a.employees?.full_name} was ${a.late_minutes} minute(s) late on ${formatDate(a.work_date)}.` }}>Waive</ActionButton>)}
-                      <AttendanceDialog icon="edit" id={a.id} employees={empOptions}
+                      <AttendanceDialog icon="edit" id={a.id} employees={empOptions} shiftStarts={only(shiftStarts, a.employee_id)}
                         initial={{ employee_id: a.employee_id, work_date: a.work_date, status: a.status, shift_start_time: a.shift_start_time?.slice(0, 5) ?? "", check_in_time: a.check_in_time?.slice(0, 5) ?? "", check_out_time: a.check_out_time?.slice(0, 5) ?? "", is_additional_working_day: a.is_additional_working_day, remarks: a.remarks ?? "" }} />
                       <ActionButton size="icon" variant="ghost" aria-label="Delete" action={deleteAttendance.bind(null, a.id)} confirm={{ title: "Delete attendance?", description: "The employee's open payroll is recalculated.", destructive: true, confirmLabel: "Delete" }}><Trash2 /></ActionButton>
                     </div>
@@ -126,7 +127,7 @@ async function Daily({ params, today, branchFilter, empOptions, isAdmin, branche
       {unmarked.length > 0 && (
         <Section title={`Not marked on ${formatDate(date)}`} description="Active employees without an attendance record for this date.">
           <div className="flex flex-wrap gap-2 p-4">
-            {unmarked.slice(0, 120).map((e) => <AttendanceDialog key={e.value} employees={empOptions} triggerLabel={e.label} initial={{ employee_id: e.value, work_date: date }} />)}
+            {unmarked.slice(0, 120).map((e) => <AttendanceDialog key={e.value} employees={empOptions} triggerLabel={e.label} shiftStarts={only(shiftStarts, e.value)} initial={{ employee_id: e.value, work_date: date }} />)}
           </div>
         </Section>
       )}
@@ -225,4 +226,24 @@ async function Allocations({ month, branches, empOptions }: { month: string; bra
       </Section>
     </div>
   );
+}
+
+const only = (m: Record<string, string>, id: string) => (m[id] ? { [id]: m[id] } : {});
+
+/** Each employee's shift start as HH:MM: their own allocated shift, else their branch's default shift. */
+async function loadShiftStarts(supabase: Awaited<ReturnType<typeof createClient>>, employeeIds: string[]): Promise<Record<string, string>> {
+  if (!employeeIds.length) return {};
+  const [{ data: emps }, { data: shifts }, { data: brs }] = await Promise.all([
+    supabase.from("employees").select("id, shift_id, branch_id").in("id", employeeIds.slice(0, 2000)),
+    supabase.from("shifts").select("id, start_time"),
+    supabase.from("branches").select("id, default_shift_id"),
+  ]);
+  const start = new Map((shifts ?? []).map((s) => [s.id as string, String(s.start_time).slice(0, 5)]));
+  const branchShift = new Map((brs ?? []).map((b) => [b.id as string, b.default_shift_id as string | null]));
+  const out: Record<string, string> = {};
+  for (const e of emps ?? []) {
+    const t = (e.shift_id && start.get(e.shift_id)) || start.get(branchShift.get(e.branch_id) ?? "");
+    if (t) out[e.id] = t;
+  }
+  return out;
 }
