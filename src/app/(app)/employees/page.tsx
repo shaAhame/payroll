@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { EmptyState, PageHeader, Section } from "@/components/app/page-header";
@@ -70,7 +70,15 @@ export default async function EmployeesPage({ searchParams }: { searchParams: Pr
                 <TR key={e.id}>
                   <TD className="font-mono text-xs">{e.employee_code}</TD>
                   <TD>
-                    <Link href={`/employees/${e.id}`} className="font-medium text-primary hover:underline">{e.full_name}</Link>
+                    <div className="flex items-center gap-1">
+                      <Link href={`/employees/${e.id}`} className="font-medium text-primary hover:underline">{e.full_name}</Link>
+                      {isAdmin && (
+                        <Link href={`/employees/${e.id}/edit`} aria-label={`Edit ${e.full_name}`} title="Edit employee"
+                          className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Link>
+                      )}
+                    </div>
                     {e.email && <div className="text-xs text-muted-foreground">{e.email}</div>}
                   </TD>
                   <TD>{e.designation}</TD>
